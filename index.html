@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TaskFlow: papan tugas Kanban dengan drag and drop, filter, validasi, dan penyimpanan otomatis.">
+  <title>TaskFlow — Papan Tugas Kanban</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- ===== HEADER ===== -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">TF</div>
+        <div>
+          <h1>TaskFlow</h1>
+          <p>Kanban Task Manager</p>
+        </div>
+      </div>
+
+      <div class="topbar-tools">
+        <label class="search">
+          <span class="visually-hidden">Cari tugas</span>
+          <input type="search" id="searchInput" placeholder="Cari tugas…  ( tekan / )" autocomplete="off">
+        </label>
+
+        <div class="segmented" role="group" aria-label="Tampilan">
+          <button type="button" class="view-btn active" data-view="board">Board</button>
+          <button type="button" class="view-btn" data-view="list">List</button>
+        </div>
+
+        <button type="button" class="ghost-btn" id="exportBtn" title="Unduh backup JSON">Export</button>
+        <label class="ghost-btn" title="Pulihkan dari backup JSON">
+          Import
+          <input type="file" id="importFile" accept=".json,application/json" class="visually-hidden">
+        </label>
+        <button type="button" class="ghost-btn icon-only" id="themeBtn" aria-label="Ganti tema">🌙</button>
+        <button type="button" class="primary-btn" id="newTaskBtn">+ Task Baru</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- ===== RINGKASAN ===== -->
+      <section class="overview" aria-label="Ringkasan">
+        <div class="hero card-surface">
+          <div class="ring" id="ring" style="--pct: 0">
+            <span id="ringPercent">0%</span>
+          </div>
+          <div>
+            <h2>Progres Keseluruhan</h2>
+            <p id="progressText" class="muted">0 dari 0 tugas selesai</p>
+            <p class="muted small">Geser kartu antar kolom untuk mengubah status.</p>
+          </div>
+        </div>
+
+        <div class="stat card-surface">
+          <span class="stat-label">Total</span>
+          <strong id="statTotal">0</strong>
+        </div>
+        <div class="stat card-surface">
+          <span class="stat-label"><i class="dot dot-todo"></i> To Do</span>
+          <strong id="statTodo">0</strong>
+        </div>
+        <div class="stat card-surface">
+          <span class="stat-label"><i class="dot dot-progress"></i> In Progress</span>
+          <strong id="statProgress">0</strong>
+        </div>
+        <div class="stat card-surface">
+          <span class="stat-label"><i class="dot dot-done"></i> Done</span>
+          <strong id="statDone">0</strong>
+        </div>
+        <div class="stat card-surface stat-warn">
+          <span class="stat-label"><i class="dot dot-late"></i> Terlambat</span>
+          <strong id="statOverdue">0</strong>
+        </div>
+      </section>
+
+      <!-- ===== FILTER ===== -->
+      <section class="toolbar" aria-label="Filter">
+        <div class="tabs" role="group" aria-label="Filter status">
+          <button type="button" class="tab active" data-filter="all" aria-pressed="true">Semua <span
+              class="tab-count">0</span></button>
+          <button type="button" class="tab" data-filter="todo" aria-pressed="false">To Do <span
+              class="tab-count">0</span></button>
+          <button type="button" class="tab" data-filter="progress" aria-pressed="false">In Progress <span
+              class="tab-count">0</span></button>
+          <button type="button" class="tab" data-filter="done" aria-pressed="false">Done <span
+              class="tab-count">0</span></button>
+        </div>
+
+        <div class="toolbar-right">
+          <label class="select-wrap">
+            <span class="visually-hidden">Filter prioritas</span>
+            <select id="priorityFilter">
+              <option value="all">Semua prioritas</option>
+              <option value="Tinggi">🔴 Tinggi</option>
+              <option value="Sedang">🟡 Sedang</option>
+              <option value="Rendah">🟢 Rendah</option>
+            </select>
+          </label>
+          <button type="button" class="link-btn" id="clearFilters" hidden>Reset filter</button>
+        </div>
+      </section>
+
+      <!-- ===== BOARD VIEW ===== -->
+      <section id="boardView" class="board" aria-label="Papan Kanban">
+
+        <section class="column" data-status="todo" aria-label="Kolom To Do">
+          <header class="column-head">
+            <i class="dot dot-todo"></i>
+            <h2>To Do</h2>
+            <span class="column-count">0</span>
+            <button type="button" class="icon-btn column-add" data-status="todo"
+              aria-label="Tambah tugas ke To Do">+</button>
+          </header>
+          <div class="column-list"></div>
+          <form class="quick-add" data-status="todo" novalidate>
+            <div class="quick-row">
+              <input type="text" placeholder="+ Tambah cepat…" maxlength="80" aria-label="Judul tugas baru di To Do">
+              <button type="submit">Tambah</button>
+            </div>
+            <p class="quick-error" role="alert"></p>
+          </form>
+        </section>
+
+        <section class="column" data-status="progress" aria-label="Kolom In Progress">
+          <header class="column-head">
+            <i class="dot dot-progress"></i>
+            <h2>In Progress</h2>
+            <span class="column-count">0</span>
+            <button type="button" class="icon-btn column-add" data-status="progress"
+              aria-label="Tambah tugas ke In Progress">+</button>
+          </header>
+          <div class="column-list"></div>
+          <form class="quick-add" data-status="progress" novalidate>
+            <div class="quick-row">
+              <input type="text" placeholder="+ Tambah cepat…" maxlength="80"
+                aria-label="Judul tugas baru di In Progress">
+              <button type="submit">Tambah</button>
+            </div>
+            <p class="quick-error" role="alert"></p>
+          </form>
+        </section>
+
+        <section class="column" data-status="done" aria-label="Kolom Done">
+          <header class="column-head">
+            <i class="dot dot-done"></i>
+            <h2>Done</h2>
+            <span class="column-count">0</span>
+            <button type="button" class="icon-btn column-add" data-status="done"
+              aria-label="Tambah tugas ke Done">+</button>
+          </header>
+          <div class="column-list"></div>
+          <form class="quick-add" data-status="done" novalidate>
+            <div class="quick-row">
+              <input type="text" placeholder="+ Tambah cepat…" maxlength="80" aria-label="Judul tugas baru di Done">
+              <button type="submit">Tambah</button>
+            </div>
+            <p class="quick-error" role="alert"></p>
+          </form>
+        </section>
+      </section>
+
+      <!-- ===== LIST VIEW ===== -->
+      <section id="listView" class="list-view card-surface" aria-label="Daftar tugas" hidden>
+        <div class="row row-head">
+          <span>Tugas</span><span>Status</span><span>Prioritas</span><span>Deadline</span><span></span>
+        </div>
+        <div id="listBody"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>
+        Data tersimpan otomatis di browser (localStorage). Gunakan <b>Export</b> untuk backup.
+        Pintasan: <kbd>N</kbd> tugas baru · <kbd>/</kbd> cari · <kbd>Esc</kbd> tutup dialog.
+      </p>
+      <button type="button" class="link-btn" id="resetBtn">Reset ke data contoh</button>
+    </footer>
+  </div>
+
+  <!-- ===== DIALOG TAMBAH / EDIT ===== -->
+  <dialog id="taskDialog" aria-labelledby="dialogTitle">
+    <form id="taskForm" novalidate>
+      <div class="dialog-head">
+        <h2 id="dialogTitle">Buat Tugas Baru</h2>
+        <button type="button" class="icon-btn" id="closeDialogBtn" aria-label="Tutup">✕</button>
+      </div>
+
+      <div class="field">
+        <label for="fieldTitle">Judul Tugas</label>
+        <input type="text" id="fieldTitle" maxlength="80" placeholder="Contoh: Implementasi fitur filter"
+          autocomplete="off">
+        <p class="field-error" id="titleError" role="alert"></p>
+      </div>
+
+      <div class="field">
+        <label for="fieldDesc">Deskripsi</label>
+        <textarea id="fieldDesc" rows="2" maxlength="300" placeholder="Opsional: jelaskan pekerjaannya"></textarea>
+      </div>
+
+      <div class="field-grid">
+        <div class="field">
+          <label for="fieldStatus">Status</label>
+          <select id="fieldStatus">
+            <option value="todo">To Do</option>
+            <option value="progress">In Progress</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="fieldPriority">Prioritas</label>
+          <select id="fieldPriority">
+            <option value="Tinggi">🔴 Tinggi</option>
+            <option value="Sedang" selected>🟡 Sedang</option>
+            <option value="Rendah">🟢 Rendah</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="fieldDue">Deadline</label>
+          <input type="date" id="fieldDue">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="subtaskInput">Checklist (opsional)</label>
+        <div class="inline-add">
+          <input type="text" id="subtaskInput" maxlength="80" placeholder="Tambah poin checklist, tekan Enter"
+            autocomplete="off">
+          <button type="button" class="ghost-btn" id="addSubtaskBtn">Tambah</button>
+        </div>
+        <ul id="subtaskList" class="subtask-list"></ul>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="danger-btn" id="deleteTaskBtn" hidden>Hapus</button>
+        <span class="spacer"></span>
+        <button type="button" class="ghost-btn" id="cancelBtn">Batal</button>
+        <button type="submit" class="primary-btn">Simpan</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <div id="confettiLayer" class="confetti-layer" aria-hidden="true"></div>
+</body>
+
+</html>

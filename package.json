@@ -1,0 +1,15 @@
+{
+  "name": "taskflow-kanban",
+  "version": "1.0.0",
+  "description": "TaskFlow: papan tugas Kanban (To-Do List) dengan drag and drop, filter, validasi, dan penyimpanan otomatis.",
+  "main": "script.js",
+  "scripts": {
+    "lint": "eslint script.js",
+    "lint:fix": "eslint script.js --fix"
+  },
+  "keywords": ["todo", "kanban", "javascript", "ukk"],
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^9.0.0"
+  }
+}

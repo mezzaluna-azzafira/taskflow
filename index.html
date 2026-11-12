@@ -349,7 +349,7 @@
       width: 48px;
       height: 48px;
       border-radius: 16px;
-      background: linear-gradient(145deg, #7164d4, #a18ee8);
+      background: linear-gradient(145deg, #c164d4, #a18ee8);
       display: grid;
       place-items: center;
       color: white;
@@ -476,7 +476,7 @@
     .side-link:hover,
     .side-link.active {
       background: #f0edff;
-      color: #7164d2;
+      color: #d664ff;
     }
 
     .side-icon {
@@ -543,7 +543,7 @@
 
     .focus-spark {
       display: block;
-      color: #8b7cdb;
+      color: #ab57ec;
       font-size: 1.25rem;
       margin-bottom: 6px;
     }
@@ -638,7 +638,7 @@
     }
 
     .welcome-copy h2 span {
-      color: #a48ddd;
+      color: #a453ef;
       margin-left: 6px;
     }
 
@@ -868,7 +868,7 @@
       height: 28px;
       border-radius: 9px;
       background: #f0edff;
-      color: #7769d6;
+      color: #aa2aea;
       font-size: 1.1rem;
     }
 
@@ -1542,94 +1542,7 @@
   <div class="confetti-layer" id="confettiLayer"
     style="position:fixed; inset:0; pointer-events:none; z-index:9; overflow:hidden;"></div>
 
-  <script>
-    const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-    const authScreen = $('#authScreen'), app = $('#app'), authForm = $('#authForm'); let authMode = 'signin', currentUser = '', tasks = [], editingId = null, subtasks = [], filter = 'all', view = 'board', search = '', priority = 'all', dragId = null;
-    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const key = () => `taskflow_tasks_${currentUser}`, usersKey = 'taskflow_demo_users';
-    function getUsers() { try { return JSON.parse(localStorage.getItem(usersKey) || '{}') } catch { return {} } }
-    function setMode(mode) { authMode = mode; $$('[data-auth]').forEach(b => b.classList.toggle('active', b.dataset.auth === mode)); $('#nameField').hidden = mode !== 'signup'; $('#authName').required = mode === 'signup'; $('#authTitle').textContent = mode === 'signup' ? 'Create your space' : 'Welcome back!'; $('#authSubtitle').textContent = mode === 'signup' ? 'Buat akun dan mulai susun progresmu hari ini.' : 'Masuk dan lanjutkan hal hebat yang sedang kamu kerjakan.'; $('#authSubmit').textContent = mode === 'signup' ? 'Buat akun & mulai →' : 'Masuk ke TaskFlow →'; $('#authPassword').autocomplete = mode === 'signup' ? 'new-password' : 'current-password'; $('#authError').textContent = '' }
-    $$('[data-auth]').forEach(b => b.addEventListener('click', () => setMode(b.dataset.auth)));
-    $('.toggle-pass').addEventListener('click', () => { let p = $('#authPassword'); p.type = p.type === 'password' ? 'text' : 'password' });
-    authForm.addEventListener('submit', e => {
-      e.preventDefault();
-      const error = $('#authError');
-      error.textContent = '';
-      const email = $('#authEmail').value.trim().toLowerCase();
-      const pass = $('#authPassword').value;
-      const name = $('#authName').value.trim();
-      if (!email || !$('#authEmail').checkValidity()) {
-        error.textContent = 'Masukkan alamat email yang valid, contohnya nama@email.com.';
-        return;
-      }
-      if (pass.length < 6) {
-        error.textContent = 'Password minimal harus 6 karakter.';
-        return;
-      }
-      if (authMode === 'signup' && !name) {
-        error.textContent = 'Nama lengkap wajib diisi.';
-        return;
-      }
-      try {
-        localStorage.setItem('__taskflow_storage_test__', 'ok');
-        localStorage.removeItem('__taskflow_storage_test__');
-        const users = getUsers();
-        if (authMode === 'signup') {
-          if (users[email]) {
-            error.textContent = 'Email ini sudah terdaftar. Pilih Sign in untuk masuk.';
-            return;
-          }
-          users[email] = { password: pass, name };
-          localStorage.setItem(usersKey, JSON.stringify(users));
-        } else {
-          if (!users[email] || users[email].password !== pass) {
-            error.textContent = 'Email atau password belum cocok. Jika belum punya akun, pilih Sign up dahulu.';
-            return;
-          }
-        }
-        currentUser = email;
-        localStorage.setItem('taskflow_session', email);
-        enterApp();
-      } catch (err) {
-        error.textContent = 'Browser tidak mengizinkan penyimpanan akun. Unduh file lalu buka langsung di Chrome/Edge.';
-      }
-    });
-    function enterApp() { authScreen.hidden = true; app.hidden = false; let u = getUsers()[currentUser], firstName = u?.name?.trim().split(/\s+/)[0] || 'there'; $('.brand p').textContent = `A little progress, ${firstName} ✦`; $('#welcomeHeading').innerHTML = `Welcome back, ${esc(firstName)}<span>✦</span>`; $('#welcomeDate').textContent = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date()) + ' · Let’s make today meaningful.'; try { tasks = JSON.parse(localStorage.getItem(key()) || '[]') } catch { tasks = [] } if (!tasks.length) tasks = sampleTasks(); save(); render() }
-    function sampleTasks() { let today = new Date(), date = n => { let d = new Date(today); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10) }; return [{ id: crypto.randomUUID(), title: 'Rapikan ide project portfolio', desc: 'Kumpulkan referensi dan tentukan arah visual.', status: 'todo', priority: 'Tinggi', due: date(2), subtasks: [] }, { id: crypto.randomUUID(), title: 'Buat moodboard UI', desc: 'Eksplorasi warna, tipografi, dan komponen.', status: 'progress', priority: 'Sedang', due: date(4), subtasks: [{ text: 'Cari referensi', done: true }, { text: 'Pilih palet warna', done: false }] }, { id: crypto.randomUUID(), title: 'Susun target minggu ini', desc: 'Tentukan tiga prioritas utama.', status: 'done', priority: 'Rendah', due: date(-1), subtasks: [] }] }
-    function save() { localStorage.setItem(key(), JSON.stringify(tasks)) }
-    function toast(msg) { let t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; $('#toasts').append(t); setTimeout(() => t.remove(), 2600) }
-    function isLate(t) { return t.due && t.due < new Date().toISOString().slice(0, 10) && t.status !== 'done' }
-    function visible() { return tasks.filter(t => (filter === 'all' || t.status === filter) && (priority === 'all' || t.priority === priority) && (`${t.title} ${t.desc}`.toLowerCase().includes(search.toLowerCase()))) }
-    function render() {
-      let counts = { todo: 0, progress: 0, done: 0 }; tasks.forEach(t => counts[t.status]++); let done = counts.done, total = tasks.length, pct = total ? Math.round(done / total * 100) : 0; $('#ring').style.setProperty('--pct', pct); $('#ringPercent').textContent = pct + '%'; $('#progressText').textContent = `${done} dari ${total} tugas selesai`; $('#statTotal').textContent = total; $('#statTodo').textContent = counts.todo; $('#statProgress').textContent = counts.progress; $('#statDone').textContent = done; $('#statOverdue').textContent = tasks.filter(isLate).length; $$('.tab').forEach(b => { b.classList.toggle('active', b.dataset.filter === filter); b.querySelector('.tab-count').textContent = b.dataset.filter === 'all' ? total : counts[b.dataset.filter] }); $('#clearFilters').hidden = filter === 'all' && priority === 'all' && !search;
-      let shown = visible(); $$('.column').forEach(col => { let status = col.dataset.status, items = shown.filter(t => t.status === status); col.querySelector('.column-count').textContent = items.length; let list = col.querySelector('.column-list'); list.innerHTML = items.length ? items.map(taskHTML).join('') : '<div class="empty">✧ Belum ada tugas di sini</div>' });
-      $('#listBody').innerHTML = shown.length ? shown.map(t => `<div class="row list-row"><strong>${esc(t.title)}</strong><span>${labelStatus(t.status)}</span><span>${esc(t.priority)}</span><span>${t.due || '—'}</span><span><button data-edit="${t.id}">Edit</button></span></div>`).join('') : '<div class="empty">Belum ada tugas yang cocok.</div>';
-      $('#boardView').hidden = view !== 'board'; $('#listView').hidden = view !== 'list'; $$('[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === view));
-    }
-    function labelStatus(s) { return s === 'todo' ? 'To Do' : s === 'progress' ? 'In Progress' : 'Done' }
-    function taskHTML(t) { return `<article class="task-card" draggable="true" data-id="${t.id}"><div class="task-top"><span class="priority ${t.priority}">${t.priority}</span><button class="task-menu" data-edit="${t.id}" aria-label="Edit tugas">···</button></div><h3>${esc(t.title)}</h3><p>${esc(t.desc || 'Tidak ada deskripsi.')}</p>${t.subtasks?.length ? `<div class="task-check-progress" style="margin-top:10px;"><div style="display:flex; justify-between; font-size:0.7rem; color:#a09db0; margin-bottom:4px;"><span>Checklist</span><strong>${t.subtasks.filter(s => s.done).length}/${t.subtasks.length}</strong></div><div style="height:4px; background:#f0eff6; border-radius:8px; overflow:hidden;"><i style="display:block; height:100%; background:linear-gradient(90deg, #8c7cdd, #c69bdf); width:${Math.round(t.subtasks.filter(s => s.done).length / t.subtasks.length * 100)}%"></i></div></div>` : ''}<div class="task-bottom"><span class="${isLate(t) ? 'late' : ''}">${t.due ? '◷ ' + t.due : '◷ Tanpa deadline'}${isLate(t) ? ' · Terlambat' : ''}</span><div class="task-actions"><button data-move="${t.id}">Pindah ↗</button></div></div></article>` }
-    function openDialog(status = 'todo', id = null) { editingId = id; subtasks = []; let t = tasks.find(x => x.id === id); $('#dialogTitle').textContent = t ? 'Edit tugas' : 'Buat tugas baru ✦'; $('#fieldTitle').value = t?.title || ''; $('#fieldDesc').value = t?.desc || ''; $('#fieldStatus').value = t?.status || status; $('#fieldPriority').value = t?.priority || 'Sedang'; $('#fieldDue').value = t?.due || ''; subtasks = (t?.subtasks || []).map(x => ({ ...x })); $('#deleteTaskBtn').hidden = !t; $('#titleError').textContent = ''; renderSubtasks(); $('#taskDialog').showModal(); $('#fieldTitle').focus() }
-    function renderSubtasks() { $('#subtaskList').innerHTML = subtasks.map((s, i) => `<li style="display:flex; align-items:center; gap:8px; font-size:0.8rem; padding:4px 0;"><input type="checkbox" data-subcheck="${i}" ${s.done ? 'checked' : ''}> <span>${esc(s.text)}</span><button type="button" data-subdel="${i}" style="margin-left:auto; border:0; background:transparent; color:#d77989;">×</button></li>`).join('') }
-    function addTask(title, status = 'todo') { title = title.trim(); if (!title) return false; tasks.push({ id: crypto.randomUUID(), title, desc: '', status, priority: 'Sedang', due: '', subtasks: [] }); save(); render(); toast('Tugas berhasil ditambahkan ✨'); return true }
-    $('#newTaskBtn').addEventListener('click', () => openDialog()); $('#welcomeNewTask').addEventListener('click', () => openDialog()); $$('.column-add').forEach(b => b.addEventListener('click', () => openDialog(b.dataset.status)));
-    $$('.quick-add').forEach(f => f.addEventListener('submit', e => { e.preventDefault(); let input = f.querySelector('input'); if (addTask(input.value, f.dataset.status)) input.value = ''; else f.querySelector('.quick-error').textContent = 'Judul tugas tidak boleh kosong.' }));
-    $('#taskForm').addEventListener('submit', e => { e.preventDefault(); let title = $('#fieldTitle').value.trim(); if (!title) { $('#titleError').textContent = 'Judul tugas wajib diisi.'; return } let data = { title, desc: $('#fieldDesc').value.trim(), status: $('#fieldStatus').value, priority: $('#fieldPriority').value, due: $('#fieldDue').value, subtasks }; if (editingId) { Object.assign(tasks.find(t => t.id === editingId), data); toast('Perubahan disimpan ✨') } else { tasks.push({ id: crypto.randomUUID(), ...data }); toast('Tugas baru berhasil dibuat ✨') } save(); $('#taskDialog').close(); render(); if (data.status === 'done') confetti() });
-    $('#closeDialogBtn').onclick = $('#cancelBtn').onclick = () => $('#taskDialog').close();
-    $('#deleteTaskBtn').onclick = () => { if (editingId && confirm('Hapus tugas ini?')) { tasks = tasks.filter(t => t.id !== editingId); save(); render(); $('#taskDialog').close(); toast('Tugas dihapus') } }
-    $('#addSubtaskBtn').onclick = () => { let v = $('#subtaskInput').value.trim(); if (v) { subtasks.push({ text: v, done: false }); $('#subtaskInput').value = ''; renderSubtasks() } }; $('#subtaskInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#addSubtaskBtn').click() } });
-    document.addEventListener('click', e => { let edit = e.target.closest('[data-edit]'); if (edit) openDialog('todo', edit.dataset.edit); let del = e.target.closest('[data-subdel]'); if (del) { subtasks.splice(+del.dataset.subdel, 1); renderSubtasks() } let check = e.target.closest('[data-subcheck]'); if (check) { subtasks[+check.dataset.subcheck].done = check.checked; renderSubtasks() } let move = e.target.closest('[data-move]'); if (move) { let t = tasks.find(x => x.id === move.dataset.move); t.status = t.status === 'todo' ? 'progress' : t.status === 'progress' ? 'done' : 'todo'; save(); render(); toast('Status tugas diperbarui'); if (t.status === 'done') confetti() } });
-    $$('[data-filter]').forEach(b => b.addEventListener('click', () => { filter = b.dataset.filter; render() })); $$('[data-view]').forEach(b => b.addEventListener('click', () => { view = b.dataset.view; render() })); $('#priorityFilter').addEventListener('change', e => { priority = e.target.value; render() }); $('#searchInput').addEventListener('input', e => { search = e.target.value; render() }); $('#clearFilters').onclick = () => { filter = 'all'; priority = 'all'; search = ''; $('#priorityFilter').value = 'all'; $('#searchInput').value = ''; render() };
-    $$('.column').forEach(col => { col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over') }); col.addEventListener('dragleave', () => col.classList.remove('drag-over')); col.addEventListener('drop', e => { e.preventDefault(); col.classList.remove('drag-over'); let t = tasks.find(x => x.id === dragId); if (t) { t.status = col.dataset.status; save(); render(); toast('Tugas berhasil dipindahkan'); if (t.status === 'done') confetti() } }) });
-    document.addEventListener('dragstart', e => { let card = e.target.closest('.task-card'); if (card) { dragId = card.dataset.id; card.classList.add('dragging') } }); document.addEventListener('dragend', e => { e.target.closest('.task-card')?.classList.remove('dragging'); dragId = null });
-    $('#themeBtn').onclick = () => { document.body.classList.toggle('dark'); $('#themeBtn').textContent = document.body.classList.contains('dark') ? '☀' : '☾'; localStorage.setItem('taskflow_dark', document.body.classList.contains('dark') ? '1' : '0') }; if (localStorage.getItem('taskflow_dark') === '1') { $('body').classList.add('dark'); $('#themeBtn').textContent = '☀' }
-    $('#exportBtn').onclick = () => { let blob = new Blob([JSON.stringify(tasks, null, 2)], { type: 'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'taskflow-backup.json'; a.click(); URL.revokeObjectURL(a.href); toast('Backup berhasil diunduh') };
-    $('#importFile').onchange = e => { let file = e.target.files[0]; if (!file) return; let r = new FileReader(); r.onload = () => { try { let data = JSON.parse(r.result); if (!Array.isArray(data)) throw Error(); tasks = data; save(); render(); toast('Backup berhasil dipulihkan') } catch { toast('File backup tidak valid') } }; r.readAsText(file); e.target.value = '' };
-    $('#resetBtn').onclick = () => { if (confirm('Kembalikan tugas ke data contoh?')) { tasks = sampleTasks(); save(); render(); toast('Data contoh dipulihkan') } };
-    $('#logoutBtn').onclick = () => { localStorage.removeItem('taskflow_session'); currentUser = ''; app.hidden = true; authScreen.hidden = false; toast('Kamu sudah keluar') };
-    function confetti() { let layer = $('#confettiLayer'); for (let i = 0; i < 55; i++) { let c = document.createElement('i'); c.className = 'confetti'; c.style.left = Math.random() * 100 + '%'; c.style.background = ['#8b7cf0', '#f28ab5', '#58bfa6', '#f0b45c'][i % 4]; c.style.animationDelay = Math.random() * .5 + 's'; layer.append(c); setTimeout(() => c.remove(), 2400) } }
-    document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#taskDialog').open) $('#taskDialog').close(); if (e.key.toLowerCase() === 'n' && !e.target.matches('input,textarea') && !app.hidden) openDialog(); if (e.key === '/' && !e.target.matches('input,textarea') && !app.hidden) { e.preventDefault(); $('#searchInput').focus() } });
-    let session = localStorage.getItem('taskflow_session'); if (session && getUsers()[session]) { currentUser = session; enterApp() }
-  </script>
+  <script src="script.js"></script>
 </body>
 
 </html>
